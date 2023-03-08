@@ -1,0 +1,170 @@
+---
+title: "Assignment1-R Programming_Group10"
+output: pdf_document
+author: Group 10 - Anumol, Bruno, Clifford, Rushia, Skanda
+date: "2023-02-12"
+header-includes: 
+- \usepackage{fancyhdr}
+- \pagestyle{fancy}
+- \fancyfoot[CO,CE]{Github Repository - https://github.com/Clifford1811/BUS4066-TM10.git}
+- \fancyfoot[RE,RO]{\thepage}
+- \fancypagestyle{plain}{\pagestyle{fancy}}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#Install Packages install.packages('tidyverse') install.packages('dplyr') install.packages('magrittr') install.packages('ggplot') install.packages('xycorr')
+
+### Import Data Set Fuel_Consumption_2000.2022.csv
+
+```{r - import csv file or run this code to read csv file}
+Fuel_Consumption_2000.2022 <- read.csv(
+"C:/Users/Rushia/Downloads/Fuel_Consumption_2000-2022.csv/Fuel_Consumption_2000-2022.csv")
+
+fuel=Fuel_Consumption_2000.2022
+```
+
+### Print the structure of dataset
+
+```{r - print the structure of Fuel_Consumption_2000_2022}
+str(fuel)
+```
+
+### List the variables in your dataset
+
+```{r - list the variable in Fuel_Consumption_2000_2022}
+names(fuel)
+```
+
+### Print the top 15 rows of your dataset
+
+```{r - print the top 15 rows of Fuel_Consumption_2000_2022}
+head(fuel, n=5)
+```
+
+### Write a user defined function using any of the variables from the data set
+
+```{r - create function to find fuel consumption in year 2021}
+FuelConsumption_Year <- function(FUEL.CONSUMPTION) {
+  2021 - FUEL.CONSUMPTION
+}
+print(head(FuelConsumption_Year(fuel$FUEL.CONSUMPTION), N=10))
+```
+
+### Use data manipulation techniques and filter rows based on any logical criteria that exist in dataset
+
+```{r - filter through make of vehicle for BMW cars only}
+# Attach tidyverse packages to use data manipulation, reading, transforming and visualizing dataset
+library("tidyverse")
+
+filterfuel= as.data.frame(filter(fuel,fuel$MAKE=="BMW"))
+fuel %>% filter(MAKE=="BMW") %>% slice_head(n = 10)
+```
+
+### Identify the dependent & independent variables and use reshaping techniques and create a new data frame by joining those variables from dataset
+
+```{r - use reshaping techniques and create a new data frame by joining variables}
+# Create a new data frame with MAKE and MODEL column
+Col_Make_Model <- cbind(fuel$MAKE, fuel$MODEL)
+print(head(Col_Make_Model, n = 4))
+
+# Find vehicles whose make is AUDI
+df_make_is_Audi <- fuel %>%
+                filter(MAKE=="Audi")
+
+# Find vehicles whose model is A4
+df_model_is_A4 <- fuel %>%
+                filter(MAKE=="A4")
+
+# Create a new data frame with patients whose age under 30 by merging 2 prepared data frame
+df_make_Audi_model_A4 <- rbind(df_make_is_Audi, df_model_is_A4)
+print(head(df_make_Audi_model_A4, n = 2))
+```
+
+### Remove missing values in your dataset
+
+```{r - Remove missing values in Fuel_Consumption_2000.@022}
+newfuel=fuel
+newfuel%>%filter(!is.na(MAKE)) %>% slice_head(n = 5)
+```
+
+### Identify and remove duplicated data in dataset
+
+```{r - identify and remove duplicated in Fuel_Consumption_2000.2022}
+fuel%>%distinct(YEAR, MAKE, MODEL, ENGINE.SIZE,TRANSMISSION,FUEL, keep_all=TRUE) %>% slice_head(n = 10)
+```
+
+### Reorder multiple rows in descending order
+
+```{r - arrange emissions in descending order}
+fuel%>%arrange(desc(EMISSIONS)) %>% slice_head(n = 6)
+```
+
+### Rename some of the column names in dataset
+
+```{r - rename column YEAR}
+names(fuel)[names(fuel) == "YEAR"] <- "Year"  
+```
+
+### Add new variables in data frame by using a mathematical function
+
+```{r - create a new variable that preserves existing ones to calculates Emission By Year}
+fuel %>% filter(!is.na(EMISSIONS)) %>% mutate(mathf= 2000 - EMISSIONS) %>% slice_head(n=10) 
+```
+
+### Create a training set using random number generator engine
+
+```{r - training set using random number generator engine}
+#Extract 3 random rows without replacement
+fuel %>% sample_n(8, replace=FALSE)
+
+#Select top 2 rows ordered by a variable
+fuel %>% top_n(2, FUEL.CONSUMPTION)
+```
+
+### Print the summary statistics of dataset
+
+```{r - find mean fuel consumption of each make}
+fuel %>% group_by(MAKE) %>% summarise(mean(FUEL.CONSUMPTION)) %>% slice_head(n=6)
+```
+
+### Use any of the numerical variables from the dataset and perform the following statistical functions: Mean, Median, Mode, Range
+
+```{r - perform statistical functions}
+# Find mean of emissions
+mean(fuel[["EMISSIONS"]])
+
+# Find median of emissions
+median(fuel[["EMISSIONS"]])
+
+# Find mode of emissions
+cal_mode <- function(v) {
+  uniqv <- unique(v)
+  uniqv[which.max(tabulate(match(v, uniqv)))]
+}
+mode(fuel[["Emissions"]])
+
+# Find range of claim
+print(range(fuel[["EMISSIONS"]]))
+```
+
+### Plot a scatter plot for any 2 variables in dataset
+
+```{r - plot a scatter plot for fuel consumption and cylinder}
+ggplot(data = fuel,aes(x = FUEL.CONSUMPTION,y = CYLINDERS ,col = factor(Year)))+geom_point()
+```
+
+### Plot a bar plot for any 2 variables in dataset
+
+```{r - plot a bar plot for year and make}
+ggplot(data = fuel,aes(x = Year,fill = factor(MAKE)))+geom_bar()
+```
+
+### Find the correlation between any 2 variables by applying least square linear regression model
+
+```{r - find the correlation between model and year}
+xycorr = cor(fuel$Year, fuel$EMISSIONS, method="pearson")
+print(xycorr)
+```
